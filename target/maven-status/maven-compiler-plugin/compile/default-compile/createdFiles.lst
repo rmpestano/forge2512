@@ -1,0 +1,5 @@
+org/jboss/forge/ui/ListPersonWizard.class
+org/jboss/forge/Person.class
+org/jboss/forge/ui/ListPersonStep.class
+org/jboss/forge/ui/ListPersonWizard$1.class
+org/jboss/forge/PersonFilter.class
