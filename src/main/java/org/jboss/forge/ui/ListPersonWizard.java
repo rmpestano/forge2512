@@ -31,44 +31,32 @@ public class ListPersonWizard extends AbstractUICommand implements UIWizard {
 	private UIInput<String> name;
 
 	@Inject
+	@WithAttributes(label = "Size", description = "Result list size", type = InputType.DEFAULT, defaultValue = "10")
+	private UIInput<Integer> size;
+
+	@Inject
 	PersonFilter filter;
 
 	List<Person> allPerson;
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		allPerson = new ArrayList<>();
-
-		for (int i = 0; i < 10; i++) {
-			allPerson.add(new Person("person"+i));
-		}
-
 		return Metadata.forCommand(ListPersonWizard.class).name("Person: filter")
 				.category(Categories.create("Person"));
 	}
 
+	private void createListOfPerson() {
+		allPerson = new ArrayList<>();
+		int count = size.hasValue() ? size.getValue() : 10;
+
+		for (int i = 0; i < count; i++) {
+			allPerson.add(new Person("person"+i));
+		}
+	}
+
 	@Override
 	public void initializeUI(UIBuilder builder) throws Exception {
-		name.addValueChangeListener(new ValueChangeListener() {
-			@Override
-			public void valueChanged(ValueChangeEvent event) {
-				filter.getList().clear();
-				String name = event.getNewValue().toString();
-				if (name != null && !"".equals(name.toString())) {
-					filterByName(name);
-				}
-			}
-
-			private void filterByName(String name) {
-				for (Person person : allPerson) {
-					if(person.getName().contains(name)){
-						filter.add(person);
-					}
-				}
-			}
-		});
-
-		builder.add(name);
+		builder.add(name).add(size);
 	}
 
 	@Override
@@ -78,6 +66,18 @@ public class ListPersonWizard extends AbstractUICommand implements UIWizard {
 
 	@Override
 	public NavigationResult next(UINavigationContext context) throws Exception {
-		 return context.navigateTo(ListPersonStep.class);
+		createListOfPerson();
+		filterByName(name.getValue());
+	    return context.navigateTo(ListPersonStep.class);
+	}
+
+	private void filterByName(String name) {
+		filter.getList().clear();
+		name = (name == null ? "": name);
+		for (Person person : allPerson) {
+			if(person.getName().toLowerCase().contains(name.toLowerCase())){
+				filter.add(person);
+			}
+		}
 	}
 }
